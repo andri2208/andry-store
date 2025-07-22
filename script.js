@@ -1,32 +1,36 @@
 function loadProdukCallback(data) {
-  const container = document.getElementById('produk-list');
-  const entries = data.feed.entry || [];
+  document.addEventListener("DOMContentLoaded", function () {
+    const container = document.getElementById('produk-list');
+    if (!container) return;
 
-  entries.forEach(post => {
-    const title = post.title.$t;
-    const link = post.link.find(l => l.rel === "alternate").href;
-    const content = post.content.$t;
+    const entries = data.feed.entry || [];
 
-    const tmp = document.createElement("div");
-    tmp.innerHTML = content;
+    entries.forEach(post => {
+      const title = post.title.$t;
+      const link = post.link.find(l => l.rel === "alternate").href;
+      const content = post.content.$t;
 
-    const img = tmp.querySelector("img")?.src || "https://via.placeholder.com/200x200?text=No+Image";
-    const harga = tmp.querySelector("b")?.textContent || "Rp -";
+      const tmp = document.createElement("div");
+      tmp.innerHTML = content;
 
-    const html = `
-      <div class="produk">
-        <img src="${img}" alt="${title}" />
-        <h3>${title}</h3>
-        <p class="harga">${harga}</p>
-        <a class="wa-button" href="https://wa.me/6281574938272?text=Halo,%20saya%20mau%20beli%20${encodeURIComponent(title)}" target="_blank">Beli via WA</a>
-        <p><a href="${link}" target="_blank">Detail Produk</a></p>
-      </div>
-    `;
-    container.innerHTML += html;
+      const img = tmp.querySelector("img")?.src || "https://via.placeholder.com/200x200?text=No+Image";
+      const harga = tmp.querySelector("b")?.textContent || "Rp -";
+
+      const html = `
+        <div class="produk">
+          <img src="${img}" alt="${title}" />
+          <h3>${title}</h3>
+          <p class="harga">${harga}</p>
+          <a class="wa-button" href="https://wa.me/6281574938272?text=Halo,%20saya%20mau%20beli%20${encodeURIComponent(title)}" target="_blank">Beli via WA</a>
+          <p><a href="${link}" target="_blank">Detail Produk</a></p>
+        </div>
+      `;
+      container.innerHTML += html;
+    });
   });
 }
 
-// Panggil JSONP via script
+// Panggil JSONP via script dinamis
 (function() {
   const s = document.createElement('script');
   s.src = "https://andrystore01.blogspot.com/feeds/posts/default?alt=json-in-script&callback=loadProdukCallback&max-results=20";
