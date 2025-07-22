@@ -30,7 +30,7 @@ function loadProdukCallback(data) {
   });
 }
 
-// Panggil JSONP via script dinamis
+// JSONP Call
 (function() {
   const s = document.createElement('script');
   s.src = "https://andrystore01.blogspot.com/feeds/posts/default?alt=json-in-script&callback=loadProdukCallback&max-results=20";
