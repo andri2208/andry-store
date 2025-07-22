@@ -33,9 +33,9 @@ function loadProdukCallback(data) {
   });
 }
 
-// JSONP Call
+// Ambil postingan untuk beranda
 (function() {
   const s = document.createElement('script');
-  s.src = "https://andrystore01.blogspot.com/feeds/posts/default?alt=json-in-script&callback=loadProdukCallback&max-results=20";
+  s.src = "https://andrystore01.blogspot.com/feeds/posts/default?alt=json-in-script&callback=loadProdukCallback&max-results=8";
   document.body.appendChild(s);
 })();
