@@ -1,4 +1,3 @@
-<script>
 async function loadProduk() {
   const container = document.getElementById('produk-list');
   const feedUrl = "https://andrystore01.blogspot.com/feeds/posts/default?alt=json&max-results=20";
@@ -25,7 +24,7 @@ async function loadProduk() {
           <h3>${title}</h3>
           <p class="harga">${harga}</p>
           <a class="wa-button" href="https://wa.me/6281234567890?text=Halo,%20saya%20mau%20beli%20${encodeURIComponent(title)}" target="_blank">Beli via WA</a>
-          <p style="margin-top:8px;"><a href="${link}" target="_blank">Lihat Detail</a></p>
+          <p><a href="${link}" target="_blank">Detail Produk</a></p>
         </div>
       `;
       container.innerHTML += produkHTML;
@@ -37,4 +36,3 @@ async function loadProduk() {
 }
 
 document.addEventListener("DOMContentLoaded", loadProduk);
-</script>
