@@ -1,2 +1,2 @@
 # andry-store
-oko online Blogspot Andry
+toko online Blogspot Andry
