@@ -24,7 +24,7 @@ async function loadProduk() {
           <h3>${title}</h3>
           <p class="harga">${harga}</p>
           <a class="wa-button" href="https://wa.me/6281234567890?text=Halo,%20saya%20mau%20beli%20${encodeURIComponent(title)}" target="_blank">Beli via WA</a>
-          <p><a href="${link}" target="_blank">Detail Produk</a></p>
+          <p><a href="${link}" target="_blank">Lihat Detail</a></p>
         </div>
       `;
       container.innerHTML += produkHTML;
