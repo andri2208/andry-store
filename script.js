@@ -1,8 +1,11 @@
-function loadProdukCallback(data) {
-  document.addEventListener("DOMContentLoaded", function () {
-    const container = document.getElementById('produk-list');
-    if (!container) return;
+function waitForElement(selector, callback) {
+  const el = document.querySelector(selector);
+  if (el) return callback(el);
+  setTimeout(() => waitForElement(selector, callback), 100);
+}
 
+function loadProdukCallback(data) {
+  waitForElement('#produk-list', (container) => {
     const entries = data.feed.entry || [];
 
     entries.forEach(post => {
@@ -30,7 +33,7 @@ function loadProdukCallback(data) {
   });
 }
 
-// JSONP Call
+// Panggil JSONP
 (function() {
   const s = document.createElement('script');
   s.src = "https://andrystore01.blogspot.com/feeds/posts/default?alt=json-in-script&callback=loadProdukCallback&max-results=20";
