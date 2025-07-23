@@ -1,37 +1,19 @@
-const WA = '6281574938272'; // Ganti nomor admin
+const totalHarga = produk.reduce((t, p) => {
+  const angka = parseInt(p.harga.replace(/\D/g, '')) || 0;
+  return t + angka;
+}, 0);
 
-const produk = JSON.parse(localStorage.getItem('keranjang') || '[]');
-const wrapper = document.getElementById('checkout-produk');
-if (produk.length === 0) {
-  wrapper.innerHTML = '<p>Keranjang kosong.</p>';
-} else {
-  wrapper.innerHTML = produk.map(p => `
-    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-      <strong>${p.title}</strong><br/>
-      Harga: ${p.harga}<br/>
-      <img src="${p.img}" width="100">
-    </div>
-  `).join('');
-}
+const invoiceData = {
+  nomor: Date.now(),
+  tanggal: new Date().toLocaleString(),
+  nama, alamat, ekspedisi, pembayaran: bayar,
+  produk,
+  total: `Rp ${totalHarga.toLocaleString()}`
+};
 
-document.getElementById('checkout-form').addEventListener('submit', e => {
-  e.preventDefault();
-  const nama = document.getElementById('nama').value;
-  const alamat = document.getElementById('alamat').value;
-  const ekspedisi = document.getElementById('ekspedisi').value;
-  const bayar = document.getElementById('pembayaran').value;
+localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
 
-  let pesan = `*PESANAN BARU*%0A%0A`;
-  pesan += `Nama: ${nama}%0A`;
-  pesan += `Alamat: ${alamat}%0A`;
-  pesan += `Ekspedisi: ${ekspedisi}%0A`;
-  pesan += `Pembayaran: ${bayar}%0A%0A`;
-  pesan += `Produk:%0A`;
-
-  produk.forEach(p => {
-    pesan += `- ${p.title} (${p.harga})%0A`;
-  });
-
-  const url = `https://wa.me/${WA}?text=${encodeURIComponent(pesan)}`;
-  window.open(url, '_blank');
-});
+// Simpan ke laporan penjualan
+const laporan = JSON.parse(localStorage.getItem('laporanPenjualan') || '[]');
+laporan.push(invoiceData);
+localStorage.setItem('laporanPenjualan', JSON.stringify(laporan));
