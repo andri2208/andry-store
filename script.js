@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const labels = post.category?.map(l => l.term) || [];
         const img = /<img[^>]+src="([^">]+)"/.exec(content)?.[1] || "";
 
-        // Ekstrak harga dan diskon dari isi
         const hargaMatch = /Harga:\s*Rp\s*([\d.]+)/i.exec(content);
         const diskonMatch = /Diskon:\s*(\d+)%/i.exec(content);
         const kategoriMatch = /Kategori:\s*([^\n<]+)/i.exec(content);
@@ -51,3 +50,54 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("filter-kat").onchange = () => {
       const val = document.getElementById("filter-kat").value;
+      const filtered = val ? produk.filter(p => p.kategori.includes(val)) : produk;
+      renderProduk(filtered);
+    };
+
+    document.getElementById("filter-sort").onchange = () => {
+      const val = document.getElementById("filter-sort").value;
+      const sorted = [...produk];
+      if (val === "termurah") {
+        sorted.sort((a, b) => parseHarga(a.harga) - parseHarga(b.harga));
+      } else if (val === "termahal") {
+        sorted.sort((a, b) => parseHarga(b.harga) - parseHarga(a.harga));
+      } else if (val === "terbaru") {
+        sorted.sort((a, b) => b.published - a.published);
+      }
+      renderProduk(sorted);
+    };
+  }
+
+  function renderProduk(data) {
+    container.innerHTML = `<div class="produk-wrapper">` + data.map(p => {
+      const isBaru = (new Date() - p.published) / 86400000 <= 7;
+      const badgeBaru = isBaru ? `<span class="badge-baru">Baru</span>` : "";
+      const badgeDiskon = p.diskon ? `<span class="badge-diskon">-${p.diskon}%</span>` : "";
+      return `
+        <div class="produk-card">
+          ${badgeBaru}${badgeDiskon}
+          <img src="${p.img}" alt="${p.title}"/>
+          <h3>${p.title}</h3>
+          <p>${p.harga}</p>
+          <a class="btn-wa" target="_blank" href="https://wa.me/6281574938272?text=Halo kak, saya tertarik dengan produk ini:\n${p.title}\n${p.link}">Beli via WA</a>
+          <button class="btn-keranjang" onclick='tambahKeranjang(${JSON.stringify({
+            title: p.title,
+            harga: p.harga,
+            img: p.img
+          })})'>+ Keranjang</button>
+        </div>
+      `;
+    }).join("") + `</div>`;
+  }
+
+  function tambahKeranjang(data) {
+    const keranjang = JSON.parse(localStorage.getItem("keranjang") || "[]");
+    keranjang.push(data);
+    localStorage.setItem("keranjang", JSON.stringify(keranjang));
+    alert("Produk ditambahkan ke keranjang!");
+  }
+
+  function parseHarga(str) {
+    return parseInt(str.replace(/[^\d]/g, "")) || 0;
+  }
+});
