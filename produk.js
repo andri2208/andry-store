@@ -12,13 +12,13 @@ async function ambilProduk() {
     const img = parser.querySelector("img")?.src || "https://via.placeholder.com/300x300?text=No+Image";
     const harga = (content.match(/Rp[\d.]+/) || ["Rp -"])[0];
 
-    const card = `
-      <div class="produk-card">
-        <img src="${img}" alt="${title}" />
-        <h3>${title}</h3>
-        <p>${harga}</p>
-        <button onclick="location.href='https://wa.me/6281574938272?text=Halo kak, saya mau beli *${title}* dengan harga *${harga}* via Andry Store: ${link}'">Pesan via WA</button>
-      </div>
+    const cardHTML = `
+  <div class="produk-card">
+    <img src="${img}" alt="${title}">
+    <h3>${title}</h3>
+    <p class="harga">${harga}</p>
+    <button onclick="window.location.href='https://wa.me/6281574938272?text=Halo kak, saya mau beli *${title}* seharga *${harga}* via Andry Store: ${link}'">Pesan via WA</button>
+  </div>
     `;
     container.innerHTML += card;
   });
