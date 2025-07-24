@@ -19,16 +19,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const hargaMatch = content.match(/<b>Harga:\s*<\/b>(.*?)<br/);
         const harga = hargaMatch ? hargaMatch[1] : 'Rp -';
 
-        output += `
-          <div class="produk-item">
-            <a href="${link}">
-              <img src="${imgSrc}" alt="${title}">
-              <h3>${title}</h3>
-              <p class="harga">${harga}</p>
-            </a>
-          </div>
-        `;
-      });
+       output += `
+  <div class="produk-item">
+    <img src="${imgSrc}" alt="${title}">
+    <h3>${title}</h3>
+    <p class="harga">${harga}</p>
+    <button class="add-to-cart"
+      data-title="${title}"
+      data-price="${harga.replace(/[^\d]/g, '')}"
+      data-img="${imgSrc}">
+      + Keranjang
+    </button>
+  </div>
+`;
+
 
       produkContainer.innerHTML = output;
     })
