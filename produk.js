@@ -1,39 +1,27 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const container = document.getElementById("daftar-produk");
-  if (!container) return;
+async function ambilProduk() {
+  const feed = await fetch("/feeds/posts/summary?alt=json&max-results=20");
+  const data = await feed.json();
+  const container = document.getElementById("produkList");
+  container.innerHTML = "";
 
-  fetch("/feeds/posts/default?alt=json&max-results=50")
-    .then((res) => res.json())
-    .then((data) => {
-      const posts = data.feed.entry || [];
-      let html = "";
+  data.feed.entry.forEach(item => {
+    const title = item.title.$t;
+    const link = item.link.find(l => l.rel === "alternate").href;
+    const content = item.content.$t;
+    const parser = new DOMParser().parseFromString(content, "text/html");
+    const img = parser.querySelector("img")?.src || "https://via.placeholder.com/300x300?text=No+Image";
+    const harga = (content.match(/Rp[\d.]+/) || ["Rp -"])[0];
 
-      posts.forEach((post) => {
-        const title = post.title.$t;
-        const link = post.link.find(l => l.rel === "alternate").href;
-        const content = post.content.$t;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(content, "text/html");
-        const img = doc.querySelector("img");
-        const priceMatch = content.match(/Rp[\s\S]{0,10}[\d.]+/gi);
-        const price = priceMatch ? priceMatch[0].replace(/<\/?[^>]+(>|$)/g, "") : "Rp -";
+    const card = `
+      <div class="produk-card">
+        <img src="${img}" alt="${title}" />
+        <h3>${title}</h3>
+        <p>${harga}</p>
+        <button onclick="location.href='https://wa.me/6281574938272?text=Halo kak, saya mau beli *${title}* dengan harga *${harga}* via Andry Store: ${link}'">Pesan via WA</button>
+      </div>
+    `;
+    container.innerHTML += card;
+  });
+}
 
-        html += `
-          <div class="produk-item" style="border:1px solid #ddd; margin:10px; border-radius:10px; overflow:hidden">
-            <a href="${link}" style="text-decoration:none; color:inherit;">
-              <img src="${img ? img.src : 'https://via.placeholder.com/300'}" alt="${title}" style="width:100%; height:auto;">
-              <div style="padding:10px; text-align:center;">
-                <h3 style="color:orange;">${title}</h3>
-                <p style="color:#f44336; font-weight:bold;">${price}</p>
-              </div>
-            </a>
-          </div>`;
-      });
-
-      container.innerHTML = html || "<p>Tidak ada produk ditemukan.</p>";
-    })
-    .catch((err) => {
-      console.error("Gagal memuat produk:", err);
-      container.innerHTML = "<p>Gagal memuat produk.</p>";
-    });
-});
+ambilProduk();
