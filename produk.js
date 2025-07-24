@@ -25,3 +25,6 @@ async function ambilProduk() {
 }
 
 ambilProduk();
+
+<button onclick="tambahKeranjang('${title}', '${harga}')">+ Keranjang</button>
+
