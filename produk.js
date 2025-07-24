@@ -1,29 +1,46 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const nomorWA = "6281574938272"; // Ganti jika perlu
-  const produkCards = document.querySelectorAll(".produk-card");
+  const feedUrl = '/feeds/posts/default/-/produk?alt=json&max-results=20';
+  const container = document.querySelector(".produk-grid");
+  const nomorWA = "6281574938272"; // Nomor WA
 
-  produkCards.forEach(function (card) {
-    const namaProduk = card.querySelector("h3")?.textContent.trim();
-    const hargaProduk = card.querySelector(".harga")?.textContent.trim();
-    const tombolWA = document.createElement("a");
+  if (!container) return;
 
-    const linkWA = `https://wa.me/${nomorWA}?text=Halo kak, saya ingin pesan produk:\n\n*${namaProduk}*\nHarga: ${hargaProduk}\n\nMohon info stok dan cara ordernya ya.`;
+  fetch(feedUrl)
+    .then(response => response.json())
+    .then(data => {
+      const entries = data.feed.entry || [];
 
-    tombolWA.href = linkWA;
-    tombolWA.target = "_blank";
-    tombolWA.innerText = "Pesan via WhatsApp";
-    tombolWA.style = `
-      display: block;
-      margin: 10px;
-      padding: 8px;
-      background: #25D366;
-      color: white;
-      text-align: center;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-    `;
+      entries.forEach(entry => {
+        const title = entry.title.$t;
+        const content = entry.content.$t;
 
-    card.appendChild(tombolWA);
-  });
+        const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+        const image = imgMatch ? imgMatch[1] : 'https://via.placeholder.com/300x180?text=No+Image';
+
+        const hargaMatch = content.match(/(?:Harga|Rp)[^<\n]+/i);
+        const harga = hargaMatch ? hargaMatch[0] : 'Harga tidak tersedia';
+
+        const card = document.createElement("div");
+        card.className = "produk-card";
+        card.innerHTML = `
+          <img src="${image}" alt="${title}">
+          <h3>${title}</h3>
+          <div class="harga">${harga}</div>
+        `;
+
+        const btnWA = document.createElement("a");
+        const pesanWA = `Halo kak, saya ingin pesan produk:\n\n*${title}*\nHarga: ${harga}\n\nMohon info stok dan cara ordernya ya.`;
+        btnWA.href = `https://wa.me/${nomorWA}?text=${encodeURIComponent(pesanWA)}`;
+        btnWA.target = "_blank";
+        btnWA.className = "wa-btn";
+        btnWA.textContent = "Pesan via WhatsApp";
+
+        card.appendChild(btnWA);
+        container.appendChild(card);
+      });
+    })
+    .catch(error => {
+      console.error('Gagal memuat produk:', error);
+      container.innerHTML = "<p>Tidak dapat memuat produk.</p>";
+    });
 });
