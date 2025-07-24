@@ -70,4 +70,7 @@ function addToCart(nama, harga, gambar) {
   keranjang.push(produk);
   localStorage.setItem("keranjang", JSON.stringify(keranjang));
   alert("Produk ditambahkan ke keranjang!");
+  tombolWA.classList.add("wa-btn");
+
 }
+
