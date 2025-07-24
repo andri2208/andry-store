@@ -33,6 +33,27 @@ document.addEventListener("DOMContentLoaded", function () {
   </div>
 `;
 
+        document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("add-to-cart")) {
+    const btn = e.target;
+    const item = {
+      title: btn.dataset.title,
+      price: parseInt(btn.dataset.price),
+      img: btn.dataset.img,
+      qty: 1
+    };
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const exist = cart.find(p => p.title === item.title);
+    if (exist) {
+      exist.qty += 1;
+    } else {
+      cart.push(item);
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("Produk ditambahkan ke keranjang!");
+  }
+});
+
 
       produkContainer.innerHTML = output;
     })
