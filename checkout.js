@@ -1,19 +1,39 @@
-const totalHarga = produk.reduce((t, p) => {
-  const angka = parseInt(p.harga.replace(/\D/g, '')) || 0;
-  return t + angka;
-}, 0);
+// checkout.js - Kirim data checkout ke WhatsApp
 
-const invoiceData = {
-  nomor: Date.now(),
-  tanggal: new Date().toLocaleString(),
-  nama, alamat, ekspedisi, pembayaran: bayar,
-  produk,
-  total: `Rp ${totalHarga.toLocaleString()}`
-};
+document.getElementById("checkout-form").addEventListener("submit", function (e) {
+  e.preventDefault();
 
-localStorage.setItem('invoiceData', JSON.stringify(invoiceData));
+  const nama = document.getElementById("nama").value.trim();
+  const nohp = document.getElementById("nohp").value.trim();
+  const alamat = document.getElementById("alamat").value.trim();
+  const catatan = document.getElementById("catatan").value.trim();
 
-// Simpan ke laporan penjualan
-const laporan = JSON.parse(localStorage.getItem('laporanPenjualan') || '[]');
-laporan.push(invoiceData);
-localStorage.setItem('laporanPenjualan', JSON.stringify(laporan));
+  const cart = JSON.parse(localStorage.getItem("keranjang")) || [];
+  if (cart.length === 0) {
+    alert("Keranjang kosong!");
+    return;
+  }
+
+  let pesan = `*Andry Store - Order Baru*\n\n`;
+  pesan += `*Nama:* ${nama}\n`;
+  pesan += `*No HP:* ${nohp}\n`;
+  pesan += `*Alamat:* ${alamat}\n`;
+  if (catatan) pesan += `*Catatan:* ${catatan}\n`;
+
+  pesan += `\n*Daftar Produk:*\n`;
+  let total = 0;
+
+  cart.forEach((item, i) => {
+    const hargaAngka = parseInt(item.harga.replace(/\D/g, "")) || 0;
+    total += hargaAngka;
+    pesan += `${i + 1}. ${item.judul} - ${item.harga}\n`;
+  });
+
+  pesan += `\n*Total:* Rp ${total.toLocaleString("id-ID")}`;
+
+  const noWa = "6281574938272";
+  const waLink = `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
+
+  window.open(waLink, "_blank");
+  localStorage.removeItem("keranjang");
+});
