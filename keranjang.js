@@ -1,4 +1,4 @@
-// keranjang.js - Menampilkan isi keranjang dari localStorage
+
 
 function loadKeranjang() {
   const container = document.getElementById("cart-container");
