@@ -36,3 +36,38 @@ document.addEventListener("DOMContentLoaded", function () {
       container.innerHTML = "<p>Gagal memuat produk.</p>";
     });
 });
+
+fetch('https://andrystore01.blogspot.com/feeds/posts/default?alt=json')
+  .then(res => res.json())
+  .then(data => {
+    const entries = data.feed.entry || [];
+    const container = document.getElementById('produk-container');
+    
+    entries.forEach(entry => {
+      const title = entry.title.$t;
+      const link = entry.link.find(l => l.rel === "alternate")?.href;
+      const content = entry.content.$t;
+      const imgMatch = content.match(/<img[^>]+src="([^"]+)"/);
+      const imgSrc = imgMatch ? imgMatch[1] : "";
+      const priceMatch = content.match(/Rp[\s.]?\d[\d.]+/i);
+      const harga = priceMatch ? priceMatch[0] : "Rp -";
+
+      const card = `
+        <div class="produk-card">
+          <img src="${imgSrc}" alt="${title}">
+          <h3>${title}</h3>
+          <p>${harga}</p>
+          <a href="${link}" class="btn-detail">Lihat</a>
+          <button onclick="addToCart('${title}', '${harga}', '${imgSrc}')">+ Keranjang</button>
+        </div>`;
+      container.innerHTML += card;
+    });
+  });
+
+function addToCart(nama, harga, gambar) {
+  const produk = { nama, harga, gambar };
+  const keranjang = JSON.parse(localStorage.getItem("keranjang")) || [];
+  keranjang.push(produk);
+  localStorage.setItem("keranjang", JSON.stringify(keranjang));
+  alert("Produk ditambahkan ke keranjang!");
+}
