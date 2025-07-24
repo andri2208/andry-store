@@ -1,76 +1,58 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const container = document.getElementById("produk-list");
-  if (!container) return;
+  const feedUrl = '/feeds/posts/default/-/produk?alt=json&max-results=20';
+  const container = document.querySelector(".produk-grid");
+  const nomorWA = "6281574938272"; // Ganti dengan nomor Anda
 
-  fetch("/feeds/posts/default?alt=json")
-    .then(res => res.json())
+  fetch(feedUrl)
+    .then(response => response.json())
     .then(data => {
       const entries = data.feed.entry || [];
-      let html = "";
 
       entries.forEach(entry => {
         const title = entry.title.$t;
         const content = entry.content.$t;
-        const link = entry.link.find(l => l.rel === "alternate").href;
 
-        const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/i);
-        const img = imgMatch ? imgMatch[1] : "https://via.placeholder.com/200";
+        // Ambil gambar pertama
+        const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+        const image = imgMatch ? imgMatch[1] : 'https://via.placeholder.com/300x180?text=No+Image';
 
-        const hargaMatch = content.match(/<b>Harga:<\/b>\s*(.*?)<br/i);
-        const harga = hargaMatch ? hargaMatch[1] : "Rp -";
+        // Ambil harga dari isi konten
+        const hargaMatch = content.match(/(?:Harga|Rp)[^<\n]+/i);
+        const harga = hargaMatch ? hargaMatch[0] : 'Harga tidak tersedia';
 
-        html += `
-          <div class="produk-item">
-            <a href="${link}">
-              <img src="${img}" alt="${title}" />
-              <h3>${title}</h3>
-              <p class="harga">${harga}</p>
-            </a>
-          </div>`;
+        // Buat elemen produk
+        const card = document.createElement("div");
+        card.className = "produk-card";
+        card.innerHTML = `
+          <img src="${image}" alt="${title}">
+          <h3>${title}</h3>
+          <div class="harga">${harga}</div>
+        `;
+
+        // Tambah tombol WhatsApp
+        const btnWA = document.createElement("a");
+        const pesanWA = `Halo kak, saya ingin pesan produk:\n\n*${title}*\nHarga: ${harga}\n\nMohon info stok dan cara ordernya ya.`;
+        btnWA.href = `https://wa.me/${nomorWA}?text=${encodeURIComponent(pesanWA)}`;
+        btnWA.target = "_blank";
+        btnWA.textContent = "Pesan via WhatsApp";
+        btnWA.style = `
+          display: block;
+          margin: 0 10px 12px;
+          padding: 8px;
+          background: #25D366;
+          color: white;
+          text-align: center;
+          border-radius: 6px;
+          font-weight: bold;
+          text-decoration: none;
+        `;
+
+        card.appendChild(btnWA);
+        container.appendChild(card);
       });
-
-      container.innerHTML = html || "<p>Tidak ada produk ditemukan.</p>";
     })
-    .catch(err => {
-      console.error("Gagal load produk:", err);
-      container.innerHTML = "<p>Gagal memuat produk.</p>";
+    .catch(error => {
+      console.error('Gagal memuat produk:', error);
+      container.innerHTML = "<p>Tidak dapat memuat produk.</p>";
     });
 });
-
-fetch('https://andrystore01.blogspot.com/feeds/posts/default?alt=json')
-  .then(res => res.json())
-  .then(data => {
-    const entries = data.feed.entry || [];
-    const container = document.getElementById('produk-container');
-    
-    entries.forEach(entry => {
-      const title = entry.title.$t;
-      const link = entry.link.find(l => l.rel === "alternate")?.href;
-      const content = entry.content.$t;
-      const imgMatch = content.match(/<img[^>]+src="([^"]+)"/);
-      const imgSrc = imgMatch ? imgMatch[1] : "";
-      const priceMatch = content.match(/Rp[\s.]?\d[\d.]+/i);
-      const harga = priceMatch ? priceMatch[0] : "Rp -";
-
-      const card = `
-        <div class="produk-card">
-          <img src="${imgSrc}" alt="${title}">
-          <h3>${title}</h3>
-          <p>${harga}</p>
-          <a href="${link}" class="btn-detail">Lihat</a>
-          <button onclick="addToCart('${title}', '${harga}', '${imgSrc}')">+ Keranjang</button>
-        </div>`;
-      container.innerHTML += card;
-    });
-  });
-
-function addToCart(nama, harga, gambar) {
-  const produk = { nama, harga, gambar };
-  const keranjang = JSON.parse(localStorage.getItem("keranjang")) || [];
-  keranjang.push(produk);
-  localStorage.setItem("keranjang", JSON.stringify(keranjang));
-  alert("Produk ditambahkan ke keranjang!");
-  tombolWA.classList.add("wa-btn");
-
-}
-
