@@ -1,36 +1,29 @@
-async function ambilProduk() {
-  const feed = await fetch("/feeds/posts/summary?alt=json&max-results=20");
-  const data = await feed.json();
-  const container = document.getElementById("produkList");
-  container.innerHTML = "";
+document.addEventListener("DOMContentLoaded", function () {
+  const nomorWA = "6281574938272"; // Ganti jika perlu
+  const produkCards = document.querySelectorAll(".produk-card");
 
-  data.feed.entry.forEach(item => {
-    const title = item.title.$t;
-    const link = item.link.find(l => l.rel === "alternate").href;
-    const content = item.content.$t;
-    const parser = new DOMParser().parseFromString(content, "text/html");
-    const img = parser.querySelector("img")?.src || "https://via.placeholder.com/300x300?text=No+Image";
-    const harga = (content.match(/Rp[\d.]+/) || ["Rp -"])[0];
+  produkCards.forEach(function (card) {
+    const namaProduk = card.querySelector("h3")?.textContent.trim();
+    const hargaProduk = card.querySelector(".harga")?.textContent.trim();
+    const tombolWA = document.createElement("a");
 
-    const cardHTML = `
-  <div class="produk-card">
-    <img src="${img}" alt="${title}">
-    <h3>${title}</h3>
-    <p class="harga">${harga}</p>
-    <button onclick="window.location.href='https://wa.me/6281574938272?text=Halo kak, saya mau beli *${title}* seharga *${harga}* via Andry Store: ${link}'">Pesan via WA</button>
-  </div>
+    const linkWA = `https://wa.me/${nomorWA}?text=Halo kak, saya ingin pesan produk:\n\n*${namaProduk}*\nHarga: ${hargaProduk}\n\nMohon info stok dan cara ordernya ya.`;
+
+    tombolWA.href = linkWA;
+    tombolWA.target = "_blank";
+    tombolWA.innerText = "Pesan via WhatsApp";
+    tombolWA.style = `
+      display: block;
+      margin: 10px;
+      padding: 8px;
+      background: #25D366;
+      color: white;
+      text-align: center;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
     `;
-    container.innerHTML += card;
+
+    card.appendChild(tombolWA);
   });
-}
-
-ambilProduk();
-
-<button onclick="tambahKeranjang('${title}', '${harga}')">+ Keranjang</button>
-function tambahKeranjang(nama, harga) {
-  let keranjang = JSON.parse(localStorage.getItem("keranjang")) || [];
-  keranjang.push({ nama, harga });
-  localStorage.setItem("keranjang", JSON.stringify(keranjang));
-  alert("Ditambahkan ke keranjang!");
-}
-
+});
