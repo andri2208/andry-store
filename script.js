@@ -1,7 +1,8 @@
 // Hanya deklarasi jika belum ada
 if (typeof nomorWA === 'undefined') {
-  var nomorWA = '081574938272'; // Ganti dengan nomor WhatsApp kamu
+  var nomorWA = '081574938272';
 }
+
 
 // ===== Tambah ke Keranjang =====
 function tambahKeKeranjang(judul, link, gambar, harga) {
