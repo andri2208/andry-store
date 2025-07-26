@@ -1,67 +1,60 @@
-(function() {
-  const nomorWA_ScriptJS = '081574938272'; // Ganti nama variabel agar unik
+const nomorWA = '081574938272';
 
-  // Cek jika ada item di localStorage
-  function ambilKeranjang() {
-    return JSON.parse(localStorage.getItem('keranjang')) || [];
+// Menampilkan isi keranjang
+function tampilkanKeranjang(containerId) {
+  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+
+  if (keranjang.length === 0) {
+    container.innerHTML = '<p>Keranjang belanja kosong.</p>';
+    return;
   }
 
-  // Tambah produk ke keranjang
-  window.tambahKeKeranjang = function(judul, link, gambar, harga) {
-    const keranjang = ambilKeranjang();
-    keranjang.push({ judul, link, gambar, harga });
-    localStorage.setItem('keranjang', JSON.stringify(keranjang));
-    alert('Produk ditambahkan ke keranjang!');
-  };
+  keranjang.forEach((item, index) => {
+    const el = document.createElement('div');
+    el.className = 'item-keranjang';
+    el.innerHTML = `
+      <img src="${item.gambar}" alt="${item.judul}" />
+      <div class="item-detail">
+        <div class="item-judul">${item.judul}</div>
+        <div class="item-harga">${item.harga}</div>
+        <button class="hapus-btn" onclick="hapusDariKeranjang(${index})">Hapus</button>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
 
-  // Tampilkan isi keranjang (bisa dipanggil dari halaman keranjang.html)
-  window.tampilkanKeranjang = function(containerId) {
-    const keranjang = ambilKeranjang();
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
+// Menambahkan ke keranjang
+function tambahKeKeranjang(judul, link, gambar, harga) {
+  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+  keranjang.push({ judul, link, gambar, harga });
+  localStorage.setItem('keranjang', JSON.stringify(keranjang));
+  alert("Produk ditambahkan ke keranjang!");
+}
 
-    if (keranjang.length === 0) {
-      container.innerHTML = '<p>Keranjang masih kosong.</p>';
-      return;
-    }
+// Menghapus item dari keranjang
+function hapusDariKeranjang(index) {
+  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+  keranjang.splice(index, 1);
+  localStorage.setItem('keranjang', JSON.stringify(keranjang));
+  tampilkanKeranjang('keranjang-container');
+}
 
-    keranjang.forEach((item, index) => {
-      const el = document.createElement('div');
-      el.className = 'item-keranjang';
-      el.innerHTML = `
-        <img src="${item.gambar}" alt="${item.judul}" />
-        <div class="detail">
-          <div class="judul">${item.judul}</div>
-          <div class="harga">${item.harga}</div>
-          <button onclick="hapusDariKeranjang(${index})">Hapus</button>
-        </div>
-      `;
-      container.appendChild(el);
-    });
-  };
+// Checkout ke WhatsApp
+function kirimPesanan() {
+  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+  if (keranjang.length === 0) {
+    alert("Keranjang kosong!");
+    return;
+  }
 
-  // Hapus item dari keranjang
-  window.hapusDariKeranjang = function(index) {
-    const keranjang = ambilKeranjang();
-    keranjang.splice(index, 1);
-    localStorage.setItem('keranjang', JSON.stringify(keranjang));
-    location.reload(); // refresh tampilan
-  };
+  let pesan = 'Halo, saya ingin memesan:\n';
+  keranjang.forEach(item => {
+    pesan += `- ${item.judul} (${item.harga})\n`;
+  });
 
-  // Kirim pesanan ke WhatsApp
-  window.kirimPesanan = function() {
-    const keranjang = ambilKeranjang();
-    if (keranjang.length === 0) {
-      alert('Keranjang kosong!');
-      return;
-    }
-
-    let pesan = 'Halo, saya ingin pesan:\n\n';
-    keranjang.forEach((item, i) => {
-      pesan += `${i + 1}. ${item.judul} - ${item.harga}\n${item.link}\n\n`;
-    });
-
-    const waLink = `https://wa.me/62${nomorWA_ScriptJS.replace(/^0/, '')}?text=${encodeURIComponent(pesan)}`;
-    window.open(waLink, '_blank');
-  };
-})();
+  const url = `https://wa.me/62${nomorWA.replace(/^0/, '')}?text=${encodeURIComponent(pesan)}`;
+  window.open(url, '_blank');
+}
