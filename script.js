@@ -1,24 +1,43 @@
-const nomorWA = '081574938272';
+// Hanya deklarasi jika belum ada
+if (typeof nomorWA === 'undefined') {
+  var nomorWA = '081574938272'; // Ganti dengan nomor WhatsApp kamu
+}
 
-// Menampilkan isi keranjang
-function tampilkanKeranjang(containerId) {
-  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
+// ===== Tambah ke Keranjang =====
+function tambahKeKeranjang(judul, link, gambar, harga) {
+  const item = { judul, link, gambar, harga };
+  let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+
+  // Cek duplikat
+  if (!keranjang.some(p => p.judul === judul)) {
+    keranjang.push(item);
+    localStorage.setItem('keranjang', JSON.stringify(keranjang));
+    alert("Produk ditambahkan ke keranjang!");
+  } else {
+    alert("Produk sudah ada di keranjang.");
+  }
+}
+
+// ===== Tampilkan Isi Keranjang =====
+function tampilkanKeranjang(idContainer) {
+  const container = document.getElementById(idContainer);
+  let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
 
   if (keranjang.length === 0) {
-    container.innerHTML = '<p>Keranjang belanja kosong.</p>';
+    container.innerHTML = "<p>Keranjang kamu kosong.</p>";
     return;
   }
 
+  container.innerHTML = '';
   keranjang.forEach((item, index) => {
-    const el = document.createElement('div');
-    el.className = 'item-keranjang';
+    const el = document.createElement("div");
+    el.className = "item-keranjang";
     el.innerHTML = `
       <img src="${item.gambar}" alt="${item.judul}" />
       <div class="item-detail">
         <div class="item-judul">${item.judul}</div>
         <div class="item-harga">${item.harga}</div>
+        <a href="${item.link}" target="_blank">Lihat Produk</a><br/>
         <button class="hapus-btn" onclick="hapusDariKeranjang(${index})">Hapus</button>
       </div>
     `;
@@ -26,35 +45,27 @@ function tampilkanKeranjang(containerId) {
   });
 }
 
-// Menambahkan ke keranjang
-function tambahKeKeranjang(judul, link, gambar, harga) {
-  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
-  keranjang.push({ judul, link, gambar, harga });
-  localStorage.setItem('keranjang', JSON.stringify(keranjang));
-  alert("Produk ditambahkan ke keranjang!");
-}
-
-// Menghapus item dari keranjang
+// ===== Hapus Produk dari Keranjang =====
 function hapusDariKeranjang(index) {
-  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+  let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
   keranjang.splice(index, 1);
   localStorage.setItem('keranjang', JSON.stringify(keranjang));
-  tampilkanKeranjang('keranjang-container');
+  tampilkanKeranjang("keranjang-container");
 }
 
-// Checkout ke WhatsApp
+// ===== Kirim Pesanan via WhatsApp =====
 function kirimPesanan() {
-  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+  let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
   if (keranjang.length === 0) {
-    alert("Keranjang kosong!");
+    alert("Keranjang kosong.");
     return;
   }
 
-  let pesan = 'Halo, saya ingin memesan:\n';
-  keranjang.forEach(item => {
-    pesan += `- ${item.judul} (${item.harga})\n`;
+  let pesan = "Halo, saya ingin pesan:\n\n";
+  keranjang.forEach((item, i) => {
+    pesan += `${i + 1}. ${item.judul}\n${item.harga}\n${item.link}\n\n`;
   });
 
-  const url = `https://wa.me/62${nomorWA.replace(/^0/, '')}?text=${encodeURIComponent(pesan)}`;
-  window.open(url, '_blank');
+  const urlWA = `https://wa.me/62${nomorWA.replace(/^0/, '')}?text=${encodeURIComponent(pesan)}`;
+  window.open(urlWA, "_blank");
 }
