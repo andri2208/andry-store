@@ -1,39 +1,43 @@
-// checkout.js - Kirim data checkout ke WhatsApp
+<script>
+  const nomorWA = '081574938272';
 
-document.getElementById("checkout-form").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const nama = document.getElementById("nama").value.trim();
-  const nohp = document.getElementById("nohp").value.trim();
-  const alamat = document.getElementById("alamat").value.trim();
-  const catatan = document.getElementById("catatan").value.trim();
-
-  const cart = JSON.parse(localStorage.getItem("keranjang")) || [];
-  if (cart.length === 0) {
-    alert("Keranjang kosong!");
-    return;
+  function parseHarga(hargaStr) {
+    return parseInt(hargaStr.replace(/[^\d]/g, ''), 10);
   }
 
-  let pesan = `*Andry Store - Order Baru*\n\n`;
-  pesan += `*Nama:* ${nama}\n`;
-  pesan += `*No HP:* ${nohp}\n`;
-  pesan += `*Alamat:* ${alamat}\n`;
-  if (catatan) pesan += `*Catatan:* ${catatan}\n`;
+  function tampilkanCheckout() {
+    const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+    const daftar = document.getElementById('daftar-checkout');
+    const totalHargaEl = document.getElementById('total-harga');
+    const tombolWA = document.getElementById('kirim-wa');
+    let total = 0;
+    let pesanWA = 'Halo, saya ingin order:\n\n';
 
-  pesan += `\n*Daftar Produk:*\n`;
-  let total = 0;
+    if (keranjang.length === 0) {
+      daftar.innerHTML = '<p>Keranjang kosong.</p>';
+      tombolWA.style.display = 'none';
+      return;
+    }
 
-  cart.forEach((item, i) => {
-    const hargaAngka = parseInt(item.harga.replace(/\D/g, "")) || 0;
-    total += hargaAngka;
-    pesan += `${i + 1}. ${item.judul} - ${item.harga}\n`;
-  });
+    keranjang.forEach((item, index) => {
+      total += parseHarga(item.harga);
+      pesanWA += `${index + 1}. ${item.judul} - ${item.harga}\n${item.link}\n\n`;
 
-  pesan += `\n*Total:* Rp ${total.toLocaleString("id-ID")}`;
+      const el = document.createElement('div');
+      el.className = 'item-checkout';
+      el.innerHTML = `
+        <img src="${item.gambar}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;margin-right:10px;" />
+        <div style="flex:1;">
+          <div><strong>${item.judul}</strong></div>
+          <div>${item.harga}</div>
+        </div>
+      `;
+      daftar.appendChild(el);
+    });
 
-  const noWa = "6281574938272";
-  const waLink = `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
+    totalHargaEl.innerHTML = `<strong>Total:</strong> Rp ${total.toLocaleString('id-ID')}`;
+    tombolWA.href = `https://wa.me/62${nomorWA.replace(/^0/, '')}?text=${encodeURIComponent(pesanWA + '\nTotal: Rp ' + total.toLocaleString('id-ID'))}`;
+  }
 
-  window.open(waLink, "_blank");
-  localStorage.removeItem("keranjang");
-});
+  tampilkanCheckout();
+</script>
