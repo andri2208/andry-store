@@ -31,4 +31,13 @@ async function ambilProduk() {
   });
 }
 
+function tambahKeKeranjang(judul, link, gambar, harga) {
+  const produk = { judul, link, gambar, harga };
+  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+  keranjang.push(produk);
+  localStorage.setItem('keranjang', JSON.stringify(keranjang));
+  alert('Produk ditambahkan ke keranjang!');
+}
+
 ambilProduk();
+
