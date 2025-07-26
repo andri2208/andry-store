@@ -1,3 +1,4 @@
+window.nomorWA
 function tambahKeKeranjang(judul, link, gambar, harga) {
   let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
 
