@@ -1,5 +1,4 @@
 const nomorWA = '081574938272';
-
 async function ambilProduk() {
   const res = await fetch('/feeds/posts/default?alt=json&max-results=100');
   const data = await res.json();
