@@ -1,43 +1,67 @@
-const nomorWA = '081574938272'; // Ganti dengan nomor WA kamu (tanpa +62)
+(function() {
+  const nomorWA_ScriptJS = '081574938272'; // Ganti nama variabel agar unik
 
-async function ambilProduk() {
-  try {
-    const res = await fetch('/feeds/posts/default?alt=json&max-results=100');
-    const data = await res.json();
-    const entri = data.feed.entry || [];
-    const container = document.getElementById('daftar-produk');
+  // Cek jika ada item di localStorage
+  function ambilKeranjang() {
+    return JSON.parse(localStorage.getItem('keranjang')) || [];
+  }
 
-    entri.forEach(item => {
-      const judul = item.title.$t;
-      const link = item.link.find(l => l.rel === 'alternate').href;
-      const konten = item.content.$t;
+  // Tambah produk ke keranjang
+  window.tambahKeKeranjang = function(judul, link, gambar, harga) {
+    const keranjang = ambilKeranjang();
+    keranjang.push({ judul, link, gambar, harga });
+    localStorage.setItem('keranjang', JSON.stringify(keranjang));
+    alert('Produk ditambahkan ke keranjang!');
+  };
 
-      // Ambil gambar dari konten
-      const img = konten.match(/<img[^>]+src="([^">]+)"/);
-      const gambar = img ? img[1] : 'https://via.placeholder.com/300x300?text=No+Image';
+  // Tampilkan isi keranjang (bisa dipanggil dari halaman keranjang.html)
+  window.tampilkanKeranjang = function(containerId) {
+    const keranjang = ambilKeranjang();
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
 
-      // Ambil harga dari konten (format: "Harga: Rp 123.000" atau "Rp123000")
-      const hargaMatch = konten.match(/(?:Harga|Rp)[^0-9]*(\d[\d\.]*)/i);
-      const harga = hargaMatch ? 'Rp ' + hargaMatch[1].replace(/\./g, '.') : 'Harga tidak tersedia';
+    if (keranjang.length === 0) {
+      container.innerHTML = '<p>Keranjang masih kosong.</p>';
+      return;
+    }
 
-      // Buat elemen kartu produk
+    keranjang.forEach((item, index) => {
       const el = document.createElement('div');
-      el.className = 'kartu-produk';
+      el.className = 'item-keranjang';
       el.innerHTML = `
-        <img src="${gambar}" alt="${judul}" />
-        <div class="isi-produk">
-          <div class="judul-produk">${judul}</div>
-          <div class="harga-produk">${harga}</div>
-          <a class="btn-order" href="https://wa.me/62${nomorWA.replace(/^0/, '')}?text=${encodeURIComponent('Saya ingin pesan: ' + judul + ' ' + link)}" target="_blank">Order via WhatsApp</a>
-          <button class="btn-ke-keranjang" onclick="tambahKeKeranjang('${judul}', '${link}', '${gambar}', '${harga}')">+ Keranjang</button>
+        <img src="${item.gambar}" alt="${item.judul}" />
+        <div class="detail">
+          <div class="judul">${item.judul}</div>
+          <div class="harga">${item.harga}</div>
+          <button onclick="hapusDariKeranjang(${index})">Hapus</button>
         </div>
       `;
       container.appendChild(el);
     });
-  } catch (e) {
-    console.error('Gagal memuat produk:', e);
-  }
-}
+  };
 
-// Jalankan saat halaman dimuat
-document.addEventListener('DOMContentLoaded', ambilProduk);
+  // Hapus item dari keranjang
+  window.hapusDariKeranjang = function(index) {
+    const keranjang = ambilKeranjang();
+    keranjang.splice(index, 1);
+    localStorage.setItem('keranjang', JSON.stringify(keranjang));
+    location.reload(); // refresh tampilan
+  };
+
+  // Kirim pesanan ke WhatsApp
+  window.kirimPesanan = function() {
+    const keranjang = ambilKeranjang();
+    if (keranjang.length === 0) {
+      alert('Keranjang kosong!');
+      return;
+    }
+
+    let pesan = 'Halo, saya ingin pesan:\n\n';
+    keranjang.forEach((item, i) => {
+      pesan += `${i + 1}. ${item.judul} - ${item.harga}\n${item.link}\n\n`;
+    });
+
+    const waLink = `https://wa.me/62${nomorWA_ScriptJS.replace(/^0/, '')}?text=${encodeURIComponent(pesan)}`;
+    window.open(waLink, '_blank');
+  };
+})();
