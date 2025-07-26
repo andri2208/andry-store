@@ -1,58 +1,39 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const feedUrl = '/feeds/posts/default/-/produk?alt=json&max-results=20';
-  const container = document.querySelector(".produk-grid");
-  const nomorWA = "6281574938272"; // Ganti dengan nomor Anda
+const nomorWA = '081574938272';
 
-  fetch(feedUrl)
-    .then(response => response.json())
-    .then(data => {
-      const entries = data.feed.entry || [];
+async function ambilProduk() {
+  try {
+    const res = await fetch('/feeds/posts/default?alt=json&max-results=100');
+    const data = await res.json();
+    const entri = data.feed.entry || [];
+    const container = document.getElementById('daftar-produk');
 
-      entries.forEach(entry => {
-        const title = entry.title.$t;
-        const content = entry.content.$t;
+    entri.forEach(item => {
+      const judul = item.title.$t;
+      const link = item.link.find(l => l.rel === 'alternate').href;
+      const konten = item.content.$t;
 
-        // Ambil gambar pertama
-        const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
-        const image = imgMatch ? imgMatch[1] : 'https://via.placeholder.com/300x180?text=No+Image';
+      const img = konten.match(/<img[^>]+src="([^">]+)"/);
+      const gambar = img ? img[1] : 'https://via.placeholder.com/300x200?text=No+Image';
 
-        // Ambil harga dari isi konten
-        const hargaMatch = content.match(/(?:Harga|Rp)[^<\n]+/i);
-        const harga = hargaMatch ? hargaMatch[0] : 'Harga tidak tersedia';
+      const hargaMatch = konten.match(/(?:Harga|Rp)[^0-9]*(\d[\d\.]*)/i);
+      const harga = hargaMatch ? 'Rp ' + hargaMatch[1].replace(/\./g, '.') : 'Harga tidak tersedia';
 
-        // Buat elemen produk
-        const card = document.createElement("div");
-        card.className = "produk-card";
-        card.innerHTML = `
-          <img src="${image}" alt="${title}">
-          <h3>${title}</h3>
-          <div class="harga">${harga}</div>
-        `;
-
-        // Tambah tombol WhatsApp
-        const btnWA = document.createElement("a");
-        const pesanWA = `Halo kak, saya ingin pesan produk:\n\n*${title}*\nHarga: ${harga}\n\nMohon info stok dan cara ordernya ya.`;
-        btnWA.href = `https://wa.me/${nomorWA}?text=${encodeURIComponent(pesanWA)}`;
-        btnWA.target = "_blank";
-        btnWA.textContent = "Pesan via WhatsApp";
-        btnWA.style = `
-          display: block;
-          margin: 0 10px 12px;
-          padding: 8px;
-          background: #25D366;
-          color: white;
-          text-align: center;
-          border-radius: 6px;
-          font-weight: bold;
-          text-decoration: none;
-        `;
-
-        card.appendChild(btnWA);
-        container.appendChild(card);
-      });
-    })
-    .catch(error => {
-      console.error('Gagal memuat produk:', error);
-      container.innerHTML = "<p>Tidak dapat memuat produk.</p>";
+      const el = document.createElement('div');
+      el.className = 'kartu-produk';
+      el.innerHTML = `
+        <img src="${gambar}" alt="${judul}" />
+        <div class="isi-produk">
+          <div class="judul-produk">${judul}</div>
+          <div class="harga-produk">${harga}</div>
+          <a class="btn-order" href="https://wa.me/62${nomorWA.replace(/^0/, '')}?text=Halo%2C%20saya%20ingin%20pesan%20produk%20${encodeURIComponent(judul)}%20${encodeURIComponent(link)}" target="_blank">Order via WhatsApp</a>
+        </div>
+      `;
+      container.appendChild(el);
     });
-});
+
+  } catch (e) {
+    console.error('Gagal memuat produk:', e);
+  }
+}
+
+ambilProduk();
