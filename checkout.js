@@ -1,5 +1,5 @@
 <script>
-
+const nomorWA = '081574938272';
   function parseHarga(hargaStr) {
     return parseInt(hargaStr.replace(/[^\d]/g, ''), 10);
   }
