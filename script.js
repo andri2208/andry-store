@@ -1,4 +1,3 @@
-const nomorWA = '081574938272';
 
 async function ambilProduk() {
   try {
