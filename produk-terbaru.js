@@ -32,17 +32,17 @@ fetch(`${blogUrl}/feeds/posts/default?alt=json&max-results=${maxPost}`)
       const waLink = `https://wa.me/${nomorWA}?text=${encodeURIComponent(waText)}`;
 
       html += `
-        <div class="produk-item">
-          <a href="${link}" title="${title}">
-            <div class="img-wrap">
-              <img src="${thumbnail}" alt="${title}" loading="lazy" />
-            </div>
-            <h3>${title}</h3>
-          </a>
-          <div class="harga">${harga}</div>
-          <a href="${waLink}" target="_blank">Order via WhatsApp</a>
-        </div>
-      `;
+  <div class="produk-item">
+    <a href="${link}" title="${title}">
+      <div class="img-wrap">
+        <img src="${thumbnail}" alt="${title}" loading="lazy" />
+      </div>
+      <h3>${title}</h3>
+      <div class="harga">${harga}</div>
+    </a>
+  </div>
+`;
+
     });
 
     container.innerHTML = html;
