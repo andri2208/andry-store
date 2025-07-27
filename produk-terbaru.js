@@ -1,4 +1,4 @@
-// produk-terbaru.js - FINAL
+// produk-terbaru.js - FINAL (Updated Link Fix)
 
 const blogUrl = "https://andrystore01.blogspot.com";
 const maxPost = 12;
@@ -19,7 +19,12 @@ function loadProduk(start = 1) {
       let html = "";
       posts.forEach(entry => {
         const title = entry.title.$t;
-        const link = entry.link.find(l => l.rel === "alternate").href;
+
+        let link = "#";
+        if (entry.link && Array.isArray(entry.link)) {
+          const alt = entry.link.find(l => l.rel === "alternate");
+          link = alt ? alt.href : entry.link[0].href;
+        }
 
         let thumbnail = "https://via.placeholder.com/300x300?text=No+Image";
         const content = entry.content.$t;
