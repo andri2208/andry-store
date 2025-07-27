@@ -1,42 +1,49 @@
-<script>
-const nomorWA = '081574938272';
-  function parseHarga(hargaStr) {
-    return parseInt(hargaStr.replace(/[^\d]/g, ''), 10);
+document.addEventListener("DOMContentLoaded", () => {
+  const data = JSON.parse(localStorage.getItem("keranjang")) || [];
+  const container = document.getElementById("checkout-container");
+
+  if (data.length === 0) {
+    container.innerHTML = "<p>Keranjang kosong.</p>";
+    return;
   }
 
-  function tampilkanCheckout() {
-    const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
-    const daftar = document.getElementById('daftar-checkout');
-    const totalHargaEl = document.getElementById('total-harga');
-    const tombolWA = document.getElementById('kirim-wa');
-    let total = 0;
-    let pesanWA = 'Halo, saya ingin order:\n\n';
-
-    if (keranjang.length === 0) {
-      daftar.innerHTML = '<p>Keranjang kosong.</p>';
-      tombolWA.style.display = 'none';
-      return;
-    }
-
-    keranjang.forEach((item, index) => {
-      total += parseHarga(item.harga);
-      pesanWA += `${index + 1}. ${item.judul} - ${item.harga}\n${item.link}\n\n`;
-
-      const el = document.createElement('div');
-      el.className = 'item-checkout';
-      el.innerHTML = `
-        <img src="${item.gambar}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;margin-right:10px;" />
-        <div style="flex:1;">
-          <div><strong>${item.judul}</strong></div>
-          <div>${item.harga}</div>
+  let total = 0;
+  let html = "<ul class='keranjang-list'>";
+  data.forEach((item, i) => {
+    const hargaNum = parseInt(item.harga.replace(/\D/g, "")) || 0;
+    total += hargaNum;
+    html += `
+      <li>
+        <img src="${item.gambar}" />
+        <div>
+          <b>${item.judul}</b>
+          <p>Rp${item.harga}</p>
         </div>
-      `;
-      daftar.appendChild(el);
-    });
+        <button onclick="hapusProduk(${i})">Hapus</button>
+      </li>`;
+  });
+  html += "</ul>";
 
-    totalHargaEl.innerHTML = `<strong>Total:</strong> Rp ${total.toLocaleString('id-ID')}`;
-    tombolWA.href = `https://wa.me/62${nomorWA.replace(/^0/, '')}?text=${encodeURIComponent(pesanWA + '\nTotal: Rp ' + total.toLocaleString('id-ID'))}`;
-  }
+  html += `<div class="total-belanja">
+    <p>Total: <b>Rp${total.toLocaleString("id-ID")}</b></p>
+    <a href="https://wa.me/6281574938272?text=${encodeURIComponent(formatWA(data, total))}" target="_blank" class="checkout-btn">Checkout via WhatsApp</a>
+  </div>`;
 
-  tampilkanCheckout();
-</script>
+  container.innerHTML = html;
+});
+
+function formatWA(data, total) {
+  let pesan = "Halo kak, saya ingin memesan:\n";
+  data.forEach((p, i) => {
+    pesan += `${i + 1}. ${p.judul} - Rp${p.harga}\n`;
+  });
+  pesan += `\nTotal: Rp${total.toLocaleString("id-ID")}`;
+  return pesan;
+}
+
+function hapusProduk(index) {
+  let cart = JSON.parse(localStorage.getItem("keranjang")) || [];
+  cart.splice(index, 1);
+  localStorage.setItem("keranjang", JSON.stringify(cart));
+  location.reload();
+}
