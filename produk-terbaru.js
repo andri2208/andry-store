@@ -1,63 +1,73 @@
-// === Konfigurasi ===
+// produk-terbaru.js - FINAL
+
 const blogUrl = "https://andrystore01.blogspot.com";
-const maxPost = 100;
-const itemsPerPage = 8;
-const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+const maxPost = 12;
+const nomorWA = "6281574938272";
+let startIndex = 1;
 
-// === Ambil Produk ===
-fetch(`${blogUrl}/feeds/posts/default?alt=json&max-results=${maxPost}`)
-  .then(res => res.json())
-  .then(data => {
-    const posts = data.feed.entry;
-    const container = document.getElementById("produk-container");
-    if (!posts) {
-      container.innerHTML = "<p>Tidak ada produk.</p>";
-      return;
-    }
+function loadProduk(start = 1) {
+  fetch(`${blogUrl}/feeds/posts/default?alt=json&max-results=${maxPost}&start-index=${start}`)
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById("produk-container");
+      const posts = data.feed.entry;
+      if (!posts) {
+        container.innerHTML = "<p>Tidak ada produk.</p>";
+        return;
+      }
 
-    let allItems = [];
+      let html = "";
+      posts.forEach(entry => {
+        const title = entry.title.$t;
+        const link = entry.link.find(l => l.rel === "alternate").href;
 
-    posts.forEach((entry, i) => {
-      const title = entry.title.$t;
-      const link = entry.link.find(l => l.rel === "alternate").href;
-      const content = entry.content.$t;
-      const img = (content.match(/<img[^>]+src="([^">]+)"/) || [])[1] || "https://via.placeholder.com/300";
-      const harga = (content.match(/<b>\s*Harga:\s*<\/b>\s*Rp?([\d.,]+)/i) || [])[1] || "Hubungi Kami";
+        let thumbnail = "https://via.placeholder.com/300x300?text=No+Image";
+        const content = entry.content.$t;
+        const imgMatch = content.match(/<img[^>]+src=\"([^\">]+)\"/);
+        if (imgMatch) thumbnail = imgMatch[1];
 
-      allItems.push({ title, link, img, harga });
+        let harga = "Hubungi Kami";
+        const hargaMatch = content.match(/<b>\s*Harga:\s*<\/b>\s*Rp?([\d.,]+)/i);
+        if (hargaMatch) harga = "Rp" + hargaMatch[1];
+
+        html += `
+          <div class="produk-item">
+            <a href="${link}" title="${title}">
+              <div class="img-wrap">
+                <img src="${thumbnail}" alt="${title}" loading="lazy" />
+              </div>
+              <h3>${title}</h3>
+              <div class="harga">${harga}</div>
+            </a>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+
+      const total = parseInt(data.feed.openSearch$totalResults.$t);
+      const totalPages = Math.ceil(total / maxPost);
+      renderPagination(totalPages, start);
+    })
+    .catch(err => {
+      document.getElementById("produk-container").innerHTML = "<p>Gagal memuat produk.</p>";
+      console.error("Error:", err);
     });
-
-    // Pagination
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const pageItems = allItems.slice(start, end);
-
-    container.innerHTML = pageItems.map(item => `
-      <div class="produk-item">
-        <a href="${item.link}" onclick="saveProduk('${item.title}', '${item.img}', '${item.harga.replace(/'/g, "")}')" title="${item.title}">
-          <div class="img-wrap"><img src="${item.img}" loading="lazy" /></div>
-          <h3>${item.title}</h3>
-          <div class="harga">Rp${item.harga}</div>
-        </a>
-      </div>`).join("");
-
-    renderPagination(allItems.length);
-  });
-
-// === Simpan Produk untuk Detail ===
-function saveProduk(judul, gambar, harga) {
-  localStorage.setItem("produk_terakhir", JSON.stringify({ judul, gambar, harga }));
 }
 
-// === Pagination ===
-function renderPagination(totalItems) {
-  const pageCount = Math.ceil(totalItems / itemsPerPage);
-  const wrapper = document.getElementById("page-controller");
-  if (!wrapper) return;
+function renderPagination(totalPages, currentStart) {
+  const pageContainer = document.getElementById("page-controller");
+  if (!pageContainer) return;
+
+  const currentPage = Math.ceil(currentStart / maxPost);
   let html = "";
 
-  for (let i = 1; i <= pageCount; i++) {
-    html += `<a href="?page=${i}" ${i === currentPage ? 'class="current"' : ''}>${i}</a>`;
+  for (let i = 1; i <= totalPages; i++) {
+    const start = (i - 1) * maxPost + 1;
+    html += `<button onclick="loadProduk(${start})" ${i === currentPage ? 'style="background:#ff5722;color:white"' : ''}>${i}</button>`;
   }
-  wrapper.innerHTML = html;
+  pageContainer.innerHTML = html;
 }
+
+// Load pertama
+loadProduk();
