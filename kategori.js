@@ -1,32 +1,31 @@
-// === Ambil Label dari Feed ===
-const blogLabelURL = "https://andrystore01.blogspot.com/feeds/posts/default?alt=json&max-results=100";
-
-fetch(blogLabelURL)
+// Ambil label/kategori dari feed Blogspot
+fetch("https://andrystore01.blogspot.com/feeds/posts/default?alt=json&max-results=100")
   .then(res => res.json())
   .then(data => {
-    const kategoriSet = new Set();
-    const container = document.querySelector("#kategori-container ul");
-    const posts = data.feed.entry;
+    const labels = new Set();
+    const list = document.querySelector(".kategori-list");
+    const entries = data.feed.entry;
 
-    if (!posts) {
-      container.innerHTML = "<li>Tidak ada kategori</li>";
+    if (!entries) {
+      list.innerHTML = "<li>Tidak ada kategori</li>";
       return;
     }
 
-    posts.forEach(post => {
-      if (post.category) {
-        post.category.forEach(cat => {
-          kategoriSet.add(cat.term);
+    entries.forEach(entry => {
+      if (entry.category) {
+        entry.category.forEach(cat => {
+          labels.add(cat.term);
         });
       }
     });
 
-    const sorted = Array.from(kategoriSet).sort();
-    sorted.forEach(label => {
+    const sortedLabels = Array.from(labels).sort();
+    sortedLabels.forEach(label => {
       const url = `/search/label/${encodeURIComponent(label)}`;
-      container.innerHTML += `<li><a href="${url}">${label}</a></li>`;
+      list.innerHTML += `<li><a href="${url}">${label}</a></li>`;
     });
   })
   .catch(err => {
-    console.error("Gagal ambil label:", err);
+    document.querySelector(".kategori-list").innerHTML = "<li>Gagal memuat kategori</li>";
+    console.error("Kategori error:", err);
   });
