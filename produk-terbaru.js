@@ -51,3 +51,8 @@ fetch(`${blogUrl}/feeds/posts/default?alt=json&max-results=${maxPost}`)
     document.getElementById("produk-container").innerHTML = "<p>Gagal memuat produk.</p>";
     console.error("Error:", err);
   });
+
+// Setelah semua produk dimasukkan ke #produk-container
+if (typeof paginateProducts === "function") {
+  paginateProducts();
+}
