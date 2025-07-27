@@ -1,6 +1,6 @@
 // === Konfigurasi ===
 const blogUrl = "https://andrystore01.blogspot.com";
-const maxPost = 12;
+const maxPost = 100; // Ambil semua dulu, pagination akan batasi tampilannya
 const nomorWA = "6281574938272";
 
 // === Ambil Postingan ===
@@ -28,31 +28,27 @@ fetch(`${blogUrl}/feeds/posts/default?alt=json&max-results=${maxPost}`)
       const hargaMatch = content.match(/<b>\s*Harga:\s*<\/b>\s*Rp?([\d.,]+)/i);
       if (hargaMatch) harga = "Rp" + hargaMatch[1];
 
-      const waText = `Halo kak, saya tertarik dengan produk *${title}* di Andry Store.`;
-      const waLink = `https://wa.me/${nomorWA}?text=${encodeURIComponent(waText)}`;
-
       html += `
-  <div class="produk-item">
-    <a href="${link}" title="${title}">
-      <div class="img-wrap">
-        <img src="${thumbnail}" alt="${title}" loading="lazy" />
-      </div>
-      <h3>${title}</h3>
-      <div class="harga">${harga}</div>
-    </a>
-  </div>
-`;
-
+        <div class="produk-item">
+          <a href="${link}" title="${title}">
+            <div class="img-wrap">
+              <img src="${thumbnail}" alt="${title}" loading="lazy" />
+            </div>
+            <h3>${title}</h3>
+            <div class="harga">${harga}</div>
+          </a>
+        </div>
+      `;
     });
 
     container.innerHTML = html;
+
+    // Jalankan pagination setelah produk dimasukkan
+    if (typeof paginateProducts === "function") {
+      paginateProducts();
+    }
   })
   .catch(err => {
     document.getElementById("produk-container").innerHTML = "<p>Gagal memuat produk.</p>";
     console.error("Error:", err);
   });
-
-// Setelah semua produk dimasukkan ke #produk-container
-if (typeof paginateProducts === "function") {
-  paginateProducts();
-}
