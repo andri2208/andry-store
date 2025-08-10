@@ -2,7 +2,7 @@
   const LABEL = "Produk";
   const MAX_ITEMS = 10;
   const container = document.getElementById("products");
-  const feedUrl = `${location.protocol}//${location.hostname}/feeds/posts/default/-/${LABEL}?alt=json&max-results=${MAX_ITEMS}`;
+  const feedUrl = `https://andrystore01.blogspot.com/feeds/posts/default/-/${LABEL}?alt=json&max-results=${MAX_ITEMS}`;
 
   fetch(feedUrl)
     .then(response => response.json())
@@ -46,7 +46,7 @@
             <div class="product-info">
               <div class="product-title">${title}</div>
               <div class="product-price">${price}</div>
-              <a href="${postUrl}" class="btn-detail">Detail</a>
+              <a href="${postUrl}" class="btn-detail" target="_blank" rel="noopener">Detail</a>
             </div>
           </article>
         `;
