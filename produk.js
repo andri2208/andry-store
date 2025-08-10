@@ -1,43 +1,59 @@
-const nomorWA = '081574938272';
-async function ambilProduk() {
-  const res = await fetch('/feeds/posts/default?alt=json&max-results=100');
-  const data = await res.json();
-  const entri = data.feed.entry || [];
-  const container = document.getElementById('daftar-produk');
+(function(){
+  const LABEL = "Produk";
+  const MAX_ITEMS = 10;
+  const container = document.getElementById("products");
+  const feedUrl = `${location.protocol}//${location.hostname}/feeds/posts/default/-/${LABEL}?alt=json&max-results=${MAX_ITEMS}`;
 
-  entri.forEach(item => {
-    const judul = item.title.$t;
-    const link = item.link.find(l => l.rel === 'alternate').href;
-    const konten = item.content.$t;
-
-    const img = konten.match(/<img[^>]+src="([^">]+)"/);
-    const gambar = img ? img[1] : 'https://via.placeholder.com/300x300?text=No+Image';
-
-    const hargaMatch = konten.match(/(?:Harga|Rp)[^0-9]*(\d[\d\.]*)/i);
-    const harga = hargaMatch ? 'Rp ' + hargaMatch[1].replace(/\./g, '.') : 'Harga tidak tersedia';
-
-    const el = document.createElement('div');
-    el.className = 'kartu-produk';
-    el.innerHTML = `
-      <img src="${gambar}" style="width:100%;aspect-ratio:1/1;object-fit:cover;" />
-      <div class="isi-produk">
-        <div class="judul-produk">${judul}</div>
-        <div class="harga-produk">${harga}</div>
-        <a class="btn-order" href="https://wa.me/62${nomorWA.replace(/^0/, '')}?text=${encodeURIComponent('Saya ingin pesan: ' + judul + ' ' + link)}" target="_blank">Order via WhatsApp</a>
-        <button class="btn-ke-keranjang" onclick="tambahKeKeranjang('${judul}', '${link}', '${gambar}', '${harga}')">+ Keranjang</button>
-      </div>
-    `;
-    container.appendChild(el);
-  });
-}
-
-function tambahKeKeranjang(judul, link, gambar, harga) {
-  const produk = { judul, link, gambar, harga };
-  const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
-  keranjang.push(produk);
-  localStorage.setItem('keranjang', JSON.stringify(keranjang));
-  alert('Produk ditambahkan ke keranjang!');
-}
-
-ambilProduk();
-
+  fetch(feedUrl)
+    .then(response => response.json())
+    .then(data => {
+      const entries = data.feed.entry || [];
+      if(entries.length === 0) {
+        container.innerHTML = "<p>Tidak ada produk ditemukan.</p>";
+        return;
+      }
+      let html = "";
+      entries.forEach(post => {
+        const title = post.title.$t;
+        let postUrl = "";
+        if(post.link) {
+          for(let i=0; i < post.link.length; i++) {
+            if(post.link[i].rel === "alternate") {
+              postUrl = post.link[i].href;
+              break;
+            }
+          }
+        }
+        let imgUrl = "https://via.placeholder.com/300x180?text=No+Image";
+        if(post.media$thumbnail) {
+          imgUrl = post.media$thumbnail.url.replace(/\/s72\-c\//, "/s320/");
+        } else {
+          const content = post.content.$t;
+          const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+          if(imgMatch) {
+            imgUrl = imgMatch[1];
+          }
+        }
+        const content = post.content.$t;
+        let price = "";
+        const priceMatch = content.match(/Harga\s*:\s*Rp\s*([\d\.,]+)/i);
+        if(priceMatch) {
+          price = "Rp " + priceMatch[1];
+        }
+        html += `
+          <article class="product">
+            <img src="${imgUrl}" alt="${title}" />
+            <div class="product-info">
+              <div class="product-title">${title}</div>
+              <div class="product-price">${price}</div>
+              <a href="${postUrl}" class="btn-detail">Detail</a>
+            </div>
+          </article>
+        `;
+      });
+      container.innerHTML = html;
+    })
+    .catch(() => {
+      container.innerHTML = "<p>Gagal memuat produk.</p>";
+    });
+})();
